@@ -119,6 +119,17 @@ code{background:rgba(255,255,255,.08);padding:2px 7px;border-radius:6px;font-siz
       <div class="setup-note">هذه الخطوة تُعمل مرة واحدة فقط. بعدها كل إضافة/تعديل من هذه اللوحة يُحفظ في الشيت تلقائياً.</div>
     </div>
 
+    <!-- ربط الشيت متعدد التبويبات -->
+    <div class="setup-card glass">
+      <h3><span class="status-dot" id="ssidDot"></span> معرّف جدول البيانات (Spreadsheet ID)</h3>
+      <div class="setup-row">
+        <input type="text" id="ssidInput" placeholder="الصقي هنا معرف الشيت الجديد ذو التبويبات الخمسة">
+        <button class="btn" onclick="saveSpreadsheetId()">حفظ</button>
+      </div>
+      <div class="result-msg" id="ssidMsg"></div>
+      <div class="setup-note">هذا المعرّف موجود في رابط الشيت بين <code>/d/</code> و <code>/edit</code>. بعد حفظه هنا ستُقرأ كل التبويبات الخمسة مباشرة.</div>
+    </div>
+
     <div class="tabs">
       <button class="tab-btn active" data-tab="cv" onclick="switchTab('cv')">📄 السيرة الذاتية</button>
       <button class="tab-btn" data-tab="blog" onclick="switchTab('blog')">📝 المدونة</button>
@@ -234,6 +245,27 @@ code{background:rgba(255,255,255,.08);padding:2px 7px;border-radius:6px;font-siz
 /* ===================== إعدادات ===================== */
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS-WPGyCU7fTKoDuNWd8a5ydXcz9joARCL5Yxk7aPjbB11ifOeaWsEp7zifEEYr86qH5JdOQDAv5k4_/pub?output=csv";
 const LS_SCRIPT_URL = 'appsScriptUrl';
+const LS_SPREADSHEET_ID = 'spreadsheetId';
+const TABS = { profile:'الملف_الشخصي', skill:'المهارات', client:'الشعارات', dashboard:'الداشبورد', blog:'المدونة' };
+
+function getSpreadsheetId(){ return localStorage.getItem(LS_SPREADSHEET_ID) || ''; }
+function saveSpreadsheetId(){
+  const v = document.getElementById('ssidInput').value.trim();
+  localStorage.setItem(LS_SPREADSHEET_ID, v);
+  document.getElementById('ssidDot').className = 'status-dot ' + (v ? 'ok' : '');
+  showMsg('ssidMsg', v ? 'تم الحفظ ✓ — يعاد تحميل العناصر...' : 'تم المسح — رجعنا للشيت القديم', true);
+  loadExisting();
+}
+function gvizUrlAdmin(sheetName){
+  return `https://docs.google.com/spreadsheets/d/${getSpreadsheetId()}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}&cb=${Date.now()}`;
+}
+async function fetchTabAdmin(sheetName){
+  try{
+    const res = await fetch(gvizUrlAdmin(sheetName));
+    if(!res.ok) return [];
+    return csvToObjects(await res.text());
+  } catch(e){ return []; }
+}
 
 function getScriptUrl(){ return localStorage.getItem(LS_SCRIPT_URL) || ''; }
 function saveScriptUrl(){
@@ -311,6 +343,20 @@ function csvToObjects(text){
 }
 
 async function loadExisting(){
+  const ssid = getSpreadsheetId();
+  if(ssid){
+    try{
+      const [blog, dashboard, client] = await Promise.all([
+        fetchTabAdmin(TABS.blog), fetchTabAdmin(TABS.dashboard), fetchTabAdmin(TABS.client)
+      ]);
+      renderExisting('blog', blog);
+      renderExisting('dashboard', dashboard);
+      renderExisting('client', client);
+      return;
+    } catch(err){
+      console.warn('تعذّر تحميل التبويبات — رجعنا للشيت القديم', err);
+    }
+  }
   try{
     const res = await fetch(SHEET_CSV_URL + '?cachebust=' + Date.now());
     const text = await res.text();
@@ -439,6 +485,8 @@ function val(id){ return document.getElementById(id).value.trim(); }
 /* ===================== تهيئة ===================== */
 function init(){
   document.getElementById('scriptUrlInput').value = getScriptUrl();
+  document.getElementById('ssidInput').value = getSpreadsheetId();
+  document.getElementById('ssidDot').className = 'status-dot ' + (getSpreadsheetId() ? 'ok' : '');
   testConnection();
   loadExisting();
 }
