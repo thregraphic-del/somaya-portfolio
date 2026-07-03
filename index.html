@@ -536,9 +536,9 @@ function driveDirect(url, mode){
   const m = url.match(/\/d\/([a-zA-Z0-9_-]{15,})/) || url.match(/[?&]id=([a-zA-Z0-9_-]{15,})/);
   if(!m) return url;
   const id = m[1];
-  return mode === 'download'
-    ? `https://drive.google.com/uc?export=download&id=${id}`
-    : `https://drive.google.com/uc?export=view&id=${id}`;
+  if(mode === 'download') return `https://drive.google.com/uc?export=download&id=${id}`;
+  // صيغة lh3.googleusercontent.com هي الأضمن لعرض صور Drive داخل موقع خارجي (uc?export=view يتعلّق أحياناً عند التضمين المباشر)
+  return `https://lh3.googleusercontent.com/d/${id}=w1000`;
 }
 
 // يتحقق أن النص رابط http/https صالح فعلياً (وليس مجرد نص وصفي كُتب بالخطأ في خانة الرابط)
