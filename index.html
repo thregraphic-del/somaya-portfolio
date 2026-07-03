@@ -456,8 +456,8 @@ footer .f-admin:hover{opacity:1;color:var(--cyan)}
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS-WPGyCU7fTKoDuNWd8a5ydXcz9joARCL5Yxk7aPjbB11ifOeaWsEp7zifEEYr86qH5JdOQDAv5k4_/pub?output=csv";
 
 // ===== الهيكلة الجديدة متعددة التبويبات =====
-// ضعي هنا معرف الشيت (Spreadsheet ID) بعد إنشاء التبويبات الخمسة — راجعي لوحة التحكم admin لمعرفة الخطوات
-const SPREADSHEET_ID = "";
+// معرف شيت "بيانات موقع سمية عسيري" — ذو التبويبات الخمسة
+const SPREADSHEET_ID = "1ilE_CH4UMkmKTICwdBZUFub0VdTfhNu56hbgVbsWozs";
 const TABS = { profile:'الملف_الشخصي', skill:'المهارات', client:'الشعارات', dashboard:'الداشبورد', blog:'المدونة' };
 function gvizUrl(sheetName){
   return `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}&cb=${Date.now()}`;
