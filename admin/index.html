@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>لوحة التحكم — سمية عسيري</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg-0:#090909; --bg-1:#0D1117;
+  --ink:#f4f7ff; --muted:#9aa7c7; --muted-2:#6b7896;
+  --glass:rgba(255,255,255,0.045); --glass-2:rgba(255,255,255,0.08); --glass-border:rgba(255,255,255,0.12);
+  --cyan:#22d3ee; --electric:#2563eb; --green:#34d399; --red:#f87171;
+  --grad-accent:linear-gradient(120deg,#22d3ee 0%,#1e90ff 35%,#4f46e5 70%,#2563eb 100%);
+  --radius:20px;
+  --font:"Tajawal","Cairo",system-ui,sans-serif;
+  --font-display:"Cairo","Tajawal",system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);background:var(--bg-0);color:var(--ink);line-height:1.7;min-height:100vh}
+a{color:inherit}
+.container{width:min(1080px,92vw);margin:0 auto;padding:50px 0 100px}
+.glass{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);backdrop-filter:blur(16px) saturate(140%);box-shadow:0 30px 80px -30px rgba(0,0,0,.85)}
+
+.eyebrow{display:inline-flex;align-items:center;gap:9px;padding:7px 16px;border-radius:30px;background:var(--glass);border:1px solid var(--glass-border);font-size:.8rem;color:var(--cyan);font-weight:700;margin-bottom:16px}
+h1.title{font-family:var(--font-display);font-weight:900;font-size:clamp(1.5rem,4vw,2.1rem);margin-bottom:10px}
+.lead{color:var(--muted);max-width:700px;font-size:.95rem;margin-bottom:8px}
+.links-row{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+.links-row a{padding:9px 16px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);font-weight:700;font-size:.82rem;display:inline-flex;align-items:center;gap:6px;transition:.25s}
+.links-row a:hover{border-color:var(--cyan);color:var(--cyan)}
+
+.setup-card{padding:22px 24px;margin-bottom:26px}
+.setup-card h3{font-family:var(--font-display);font-size:1rem;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.status-dot{width:9px;height:9px;border-radius:50%;background:var(--muted-2);display:inline-block}
+.status-dot.ok{background:var(--green);box-shadow:0 0 8px var(--green)}
+.status-dot.bad{background:var(--red);box-shadow:0 0 8px var(--red)}
+.setup-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.setup-row input{flex:1;min-width:240px;padding:11px 14px;border-radius:10px;border:1px solid var(--glass-border);background:rgba(255,255,255,.04);color:#fff;font-family:var(--font);font-size:.85rem;direction:ltr;text-align:left}
+.setup-row input:focus{outline:none;border-color:var(--cyan)}
+.setup-note{color:var(--muted);font-size:.8rem;margin-top:10px}
+details.howto{margin-top:12px}
+details.howto summary{cursor:pointer;color:var(--cyan);font-size:.85rem;font-weight:700}
+details.howto ol{margin:10px 20px 0;color:var(--muted);font-size:.83rem;display:flex;flex-direction:column;gap:6px}
+
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.tab-btn{padding:11px 20px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border);color:var(--muted);font-weight:700;font-size:.9rem;cursor:pointer;font-family:var(--font);transition:.25s}
+.tab-btn.active{background:var(--grad-accent);color:#fff;border-color:transparent}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+.section-card{padding:26px 28px;margin-bottom:22px}
+.section-card h2{font-family:var(--font-display);font-weight:800;font-size:1.15rem;margin-bottom:6px}
+.section-sub{color:var(--muted);font-size:.86rem;margin-bottom:20px}
+
+.existing-list{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.existing-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--glass-border);font-size:.85rem}
+.existing-row .et{font-weight:700;color:#fff}
+.existing-row .es{color:var(--muted);font-size:.78rem}
+.existing-row button{padding:6px 14px;border-radius:9px;border:1px solid var(--glass-border);background:var(--glass-2);color:var(--cyan);font-size:.78rem;font-weight:700;cursor:pointer;font-family:var(--font);white-space:nowrap}
+.empty-note{color:var(--muted-2);font-size:.83rem;padding:8px 2px}
+
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:16px}
+.field label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:6px;font-weight:600}
+.field input,.field textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--glass-border);background:rgba(255,255,255,.04);color:#fff;font-family:var(--font);font-size:.9rem}
+.field textarea{resize:vertical;min-height:60px}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--cyan)}
+.field.full{grid-column:1/-1}
+
+.row-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.btn{padding:12px 24px;border-radius:12px;border:none;background:var(--grad-accent);color:#fff;font-weight:800;font-size:.9rem;cursor:pointer;font-family:var(--font)}
+.btn.ghost{background:var(--glass-2);border:1px solid var(--glass-border);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.result-msg{font-size:.85rem;margin-top:4px;min-height:20px}
+.result-msg.ok{color:var(--green)}
+.result-msg.bad{color:var(--red)}
+
+.tool-card{padding:22px 24px;margin-bottom:22px}
+.tool-card h3{font-family:var(--font-display);font-size:.95rem;margin-bottom:10px}
+.output-box{margin-top:12px;padding:12px 14px;border-radius:10px;background:rgba(0,0,0,.35);border:1px solid var(--glass-border);font-family:monospace;font-size:.8rem;color:#a8f0ff;direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-all;min-height:18px}
+code{background:rgba(255,255,255,.08);padding:2px 7px;border-radius:6px;font-size:.82em;color:#fff;direction:ltr;display:inline-block}
+</style>
+</head>
+<body>
+
+<div id="panel">
+  <div class="container">
+    <div class="eyebrow">⚙ لوحة تحكم المحتوى</div>
+    <h1 class="title">مرحباً سمية 👋</h1>
+    <p class="lead">أضيفي أو عدّلي أي عنصر من هنا، وسيظهر التحديث في الموقع خلال ثوانٍ — دون الحاجة لأي كود.</p>
+    <div class="links-row">
+      <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vS-WPGyCU7fTKoDuNWd8a5ydXcz9joARCL5Yxk7aPjbB11ifOeaWsEp7zifEEYr86qH5JdOQDAv5k4_/pubhtml" target="_blank" rel="noopener">📄 الشيت ↗</a>
+      <a href="https://drive.google.com/drive/folders/1c-jwrue1izJhp_SbjcwO8kAKDSudgEz8" target="_blank" rel="noopener">📁 Drive ↗</a>
+      <a href="../index.html">🏠 الموقع ↗</a>
+    </div>
+
+    <!-- إعداد خدمة الحفظ -->
+    <div class="setup-card glass">
+      <h3><span class="status-dot" id="statusDot"></span> ربط خدمة الحفظ (مرة واحدة فقط)</h3>
+      <div class="setup-row">
+        <input type="text" id="scriptUrlInput" placeholder="الصقي هنا رابط تطبيق الويب (Web app URL) بعد نشر Apps Script">
+        <button class="btn" onclick="saveScriptUrl()">حفظ</button>
+        <button class="btn ghost" onclick="testConnection()">اختبار الاتصال</button>
+      </div>
+      <div class="result-msg" id="setupMsg"></div>
+      <details class="howto">
+        <summary>كيف أحصل على هذا الرابط؟ (خطوات مرة واحدة)</summary>
+        <ol>
+          <li>افتحي جدول Google Sheet الخاص بالموقع.</li>
+          <li>من القائمة أعلاه: الإضافات ← Apps Script.</li>
+          <li>احذفي أي كود موجود، والصقي كود <code>Code.gs</code> المُرفق لكِ كاملاً.</li>
+          <li>احفظي، ثم اضغطي «نشر» ← «نشر جديد» ← النوع: تطبيق ويب (Web app).</li>
+          <li>«تنفيذ باسم»: أنا — «من له صلاحية الوصول»: أي مستخدم (Anyone).</li>
+          <li>اضغطي «نشر» ووافقي على الصلاحيات، ثم انسخي رابط تطبيق الويب والصقيه هنا فوق.</li>
+        </ol>
+      </details>
+      <div class="setup-note">هذه الخطوة تُعمل مرة واحدة فقط. بعدها كل إضافة/تعديل من هذه اللوحة يُحفظ في الشيت تلقائياً.</div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="cv" onclick="switchTab('cv')">📄 السيرة الذاتية</button>
+      <button class="tab-btn" data-tab="blog" onclick="switchTab('blog')">📝 المدونة</button>
+      <button class="tab-btn" data-tab="dashboard" onclick="switchTab('dashboard')">📊 لوحات البيانات</button>
+      <button class="tab-btn" data-tab="client" onclick="switchTab('client')">🏢 الشعارات</button>
+    </div>
+
+    <!-- ===================== تبويب السيرة الذاتية ===================== -->
+    <div class="tab-panel active" id="tab-cv">
+      <div class="section-card glass">
+        <h2>بيانات الملف الشخصي</h2>
+        <p class="section-sub">هذه الحقول تتحكم بمحتوى الواجهة الرئيسية (الهيرو) في الموقع. عدّليها وقتما شئتِ.</p>
+        <div class="form-grid">
+          <div class="field"><label>الاسم</label><input id="p-name" placeholder="سمية عسيري"></div>
+          <div class="field"><label>المسمى الوظيفي</label><input id="p-role" placeholder="محللة بيانات وأعمال | Power BI"></div>
+          <div class="field full"><label>النبذة التعريفية</label><textarea id="p-bio" placeholder="نبذة قصيرة عن الخبرة والتخصص"></textarea></div>
+          <div class="field full"><label>الاقتباس (يظهر أسفل الأزرار)</label><input id="p-quote" placeholder="أحوّل التفاصيل إلى رؤى..."></div>
+          <div class="field"><label>رابط ملف CV (من Drive)</label><input id="p-cv" placeholder="https://drive.google.com/file/d/.../view"></div>
+          <div class="field"><label>رابط الصورة الشخصية (من Drive)</label><input id="p-photo" placeholder="اختياري"></div>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label>مؤهل 1 (أيقونة)</label><input id="p-q1i" placeholder="🎓"></div>
+          <div class="field"><label>مؤهل 1 (نص)</label><input id="p-q1t" placeholder="بكالوريوس إدارة أعمال"></div>
+          <div class="field"><label>مؤهل 2 (أيقونة)</label><input id="p-q2i" placeholder="📊"></div>
+          <div class="field"><label>مؤهل 2 (نص)</label><input id="p-q2t" placeholder="محللة بيانات وأعمال"></div>
+          <div class="field"><label>مؤهل 3 (أيقونة)</label><input id="p-q3i" placeholder="🤖"></div>
+          <div class="field"><label>مؤهل 3 (نص)</label><input id="p-q3t" placeholder="أدوات الذكاء الاصطناعي"></div>
+        </div>
+        <div class="row-actions">
+          <button class="btn" onclick="saveProfile()">حفظ بيانات الملف الشخصي</button>
+        </div>
+        <div class="result-msg" id="msg-cv"></div>
+      </div>
+    </div>
+
+    <!-- ===================== تبويب المدونة ===================== -->
+    <div class="tab-panel" id="tab-blog">
+      <div class="section-card glass">
+        <h2>مقالات المدونة</h2>
+        <p class="section-sub">الموجود حالياً — اضغطي «تعديل» لتحميل المقال في النموذج أدناه.</p>
+        <div class="existing-list" id="list-blog"></div>
+        <div class="form-grid">
+          <div class="field full"><label>عنوان المقال</label><input id="b-title" placeholder="كيف تبني لوحة تنفيذية تُقنع الإدارة؟"></div>
+          <div class="field full"><label>ملخص المقال (يظهر بالبطاقة)</label><textarea id="b-desc" placeholder="ملخص قصير جذاب من 2-3 أسطر"></textarea></div>
+          <div class="field"><label>رابط المقال الكامل (اختياري)</label><input id="b-link" placeholder="اختياري"></div>
+          <div class="field"><label>رابط صورة الغلاف (اختياري)</label><input id="b-image" placeholder="اختياري"></div>
+          <div class="field"><label>ترتيب الظهور (اختياري)</label><input id="b-order" placeholder="1"></div>
+        </div>
+        <div class="row-actions">
+          <button class="btn" onclick="saveItem('blog')">حفظ المقال</button>
+          <button class="btn ghost" onclick="clearForm('blog')">مقال جديد (تفريغ الحقول)</button>
+        </div>
+        <div class="result-msg" id="msg-blog"></div>
+      </div>
+    </div>
+
+    <!-- ===================== تبويب لوحات البيانات ===================== -->
+    <div class="tab-panel" id="tab-dashboard">
+      <div class="section-card glass">
+        <h2>لوحات البيانات</h2>
+        <p class="section-sub">لا حاجة لصورة — إن تُركت فارغة سيولّد الموقع صورة عرض مميزة تلقائياً حسب مجال اللوحة.</p>
+        <div class="existing-list" id="list-dashboard"></div>
+        <div class="form-grid">
+          <div class="field full"><label>عنوان اللوحة</label><input id="d-title" placeholder="لوحة تحليلات المبيعات"></div>
+          <div class="field"><label>المجال</label><input id="d-category" placeholder="تجزئة"></div>
+          <div class="field"><label>رابط اللوحة</label><input id="d-link" placeholder="https://app.powerbi.com/view?r=..."></div>
+          <div class="field full"><label>الوصف (سطران فقط)</label><textarea id="d-desc" placeholder="لوحة تنفيذية تعرض..."></textarea></div>
+          <div class="field"><label>رابط صورة اللوحة (اختياري)</label><input id="d-image" placeholder="اختياري"></div>
+          <div class="field"><label>ترتيب الظهور (اختياري)</label><input id="d-order" placeholder="1"></div>
+        </div>
+        <div class="row-actions">
+          <button class="btn" onclick="saveItem('dashboard')">حفظ اللوحة</button>
+          <button class="btn ghost" onclick="clearForm('dashboard')">لوحة جديدة (تفريغ الحقول)</button>
+        </div>
+        <div class="result-msg" id="msg-dashboard"></div>
+      </div>
+    </div>
+
+    <!-- ===================== تبويب الشعارات ===================== -->
+    <div class="tab-panel" id="tab-client">
+      <div class="section-card glass">
+        <h2>شعارات جهات العمل</h2>
+        <p class="section-sub">تُعرض كصورة فقط بدون اسم مكتوب، وتتحول تلقائياً إلى اللون الأبيض لتناسب الموقع.</p>
+        <div class="existing-list" id="list-client"></div>
+        <div class="form-grid">
+          <div class="field full"><label>اسم الجهة (للأرشفة فقط - لا يظهر بالموقع)</label><input id="c-title" placeholder="اسم الجهة"></div>
+          <div class="field full"><label>رابط الشعار (من Drive)</label><input id="c-image" placeholder="https://drive.google.com/file/d/.../view"></div>
+          <div class="field"><label>رابط موقع الجهة (اختياري)</label><input id="c-link" placeholder="اختياري"></div>
+          <div class="field"><label>ترتيب الظهور (اختياري)</label><input id="c-order" placeholder="1"></div>
+        </div>
+        <div class="row-actions">
+          <button class="btn" onclick="saveItem('client')">حفظ الشعار</button>
+          <button class="btn ghost" onclick="clearForm('client')">شعار جديد (تفريغ الحقول)</button>
+        </div>
+        <div class="result-msg" id="msg-client"></div>
+      </div>
+    </div>
+
+    <!-- أداة مساعدة: محوّل روابط Drive -->
+    <div class="tool-card glass">
+      <h3>🔗 محوّل روابط Google Drive</h3>
+      <p class="section-sub" style="margin-bottom:10px">الصقي رابط مشاركة عادي من Drive ليتحوّل لرابط عرض مباشر يفهمه الموقع — انسخيه والصقيه في أي خانة "رابط صورة".</p>
+      <div class="form-grid">
+        <div class="field full"><input type="text" id="driveInput" placeholder="https://drive.google.com/file/d/XXXXXXXX/view?usp=sharing" oninput="convertDrive()"></div>
+      </div>
+      <div class="output-box" id="driveOut">سيظهر الرابط المباشر هنا…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+/* ===================== إعدادات ===================== */
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS-WPGyCU7fTKoDuNWd8a5ydXcz9joARCL5Yxk7aPjbB11ifOeaWsEp7zifEEYr86qH5JdOQDAv5k4_/pub?output=csv";
+const LS_SCRIPT_URL = 'appsScriptUrl';
+
+function getScriptUrl(){ return localStorage.getItem(LS_SCRIPT_URL) || ''; }
+function saveScriptUrl(){
+  const v = document.getElementById('scriptUrlInput').value.trim();
+  localStorage.setItem(LS_SCRIPT_URL, v);
+  showMsg('setupMsg', v ? 'تم الحفظ ✓' : 'تم المسح', true);
+  testConnection();
+}
+async function testConnection(){
+  const url = getScriptUrl();
+  const dot = document.getElementById('statusDot');
+  if(!url){ dot.className = 'status-dot bad'; showMsg('setupMsg','لم تُدخلي رابط الخدمة بعد', false); return; }
+  try{
+    const res = await fetch(url);
+    const data = await res.json();
+    if(data && data.ok){ dot.className = 'status-dot ok'; showMsg('setupMsg','متصلة بنجاح ✓', true); }
+    else { dot.className = 'status-dot bad'; showMsg('setupMsg','الخدمة ردّت لكن بخطأ — تأكدي من الكود', false); }
+  } catch(err){
+    dot.className = 'status-dot bad';
+    showMsg('setupMsg','تعذّر الاتصال — تأكدي من نشر الخدمة بصلاحية "Anyone" ومن صحة الرابط', false);
+  }
+}
+function showMsg(id, text, ok){
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'result-msg ' + (ok ? 'ok' : 'bad');
+}
+
+/* ===================== محوّل روابط Drive ===================== */
+function driveDirect(url, mode){
+  if(!url) return '';
+  url = url.trim();
+  const m = url.match(/\/d\/([a-zA-Z0-9_-]{15,})/) || url.match(/[?&]id=([a-zA-Z0-9_-]{15,})/);
+  if(!m) return url;
+  const id = m[1];
+  return mode === 'download' ? `https://drive.google.com/uc?export=download&id=${id}` : `https://drive.google.com/uc?export=view&id=${id}`;
+}
+function convertDrive(){
+  const v = document.getElementById('driveInput').value;
+  const out = document.getElementById('driveOut');
+  if(!v.trim()){ out.textContent = 'سيظهر الرابط المباشر هنا…'; return; }
+  out.textContent = 'عرض: ' + driveDirect(v,'view');
+}
+
+/* ===================== تبويبات ===================== */
+function switchTab(key){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === key));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + key));
+}
+
+/* ===================== قراءة العناصر الحالية من الشيت ===================== */
+function parseCSV(text){
+  const rows = []; let row = []; let field = ''; let inQuotes = false;
+  for(let i=0;i<text.length;i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c === '"'){ if(text[i+1] === '"'){ field += '"'; i++; } else inQuotes = false; } else field += c;
+    } else {
+      if(c === '"') inQuotes = true;
+      else if(c === ','){ row.push(field); field=''; }
+      else if(c === '\r'){ }
+      else if(c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+      else field += c;
+    }
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r => r.some(c => c && c.trim() !== ''));
+}
+function csvToObjects(text){
+  const rows = parseCSV(text);
+  if(!rows.length) return [];
+  const headers = rows[0].map(h => h.trim());
+  return rows.slice(1).map(r => { const o = {}; headers.forEach((h,i) => o[h] = (r[i]||'').trim()); return o; })
+    .filter(o => Object.values(o).some(v => v !== ''));
+}
+
+async function loadExisting(){
+  try{
+    const res = await fetch(SHEET_CSV_URL + '?cachebust=' + Date.now());
+    const text = await res.text();
+    const objs = csvToObjects(text);
+    const grouped = { blog:[], dashboard:[], client:[] };
+    objs.forEach(r => {
+      const type = (r['النوع']||'').trim().toLowerCase();
+      if(grouped[type]) grouped[type].push(r);
+      else if(!type && (r['اسم المشروع'] || r['العنوان'])){
+        grouped.dashboard.push({ 'العنوان': r['العنوان']||r['اسم المشروع']||'', 'المجال': r['المجال']||'', 'الوصف': r['الوصف']||'', 'الرابط': r['الرابط']||r['الربط']||'', 'الصورة': r['الصورة']||'' });
+      }
+    });
+    renderExisting('blog', grouped.blog);
+    renderExisting('dashboard', grouped.dashboard);
+    renderExisting('client', grouped.client);
+  } catch(err){
+    console.warn('تعذّر تحميل العناصر الحالية', err);
+  }
+}
+function esc(s){ return (s||'').toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function renderExisting(type, items){
+  const el = document.getElementById('list-' + type);
+  if(!items.length){ el.innerHTML = '<div class="empty-note">لا توجد عناصر بعد — أضيفي أول عنصر بالأسفل.</div>'; return; }
+  el.innerHTML = items.map((it,idx) => {
+    const title = it['العنوان'] || '';
+    const sub = it['المجال'] || it['الوصف'] || '';
+    return `<div class="existing-row"><div><div class="et">${esc(title)}</div><div class="es">${esc(sub).slice(0,60)}</div></div>
+      <button onclick='fillForm("${type}", ${JSON.stringify(it).replace(/'/g,"&#39;")})'>تعبئة للتعديل</button></div>`;
+  }).join('');
+}
+
+function fillForm(type, it){
+  if(type === 'blog'){
+    document.getElementById('b-title').value = it['العنوان']||'';
+    document.getElementById('b-desc').value = it['الوصف']||'';
+    document.getElementById('b-link').value = it['الرابط']||'';
+    document.getElementById('b-image').value = it['الصورة']||'';
+    document.getElementById('b-order').value = it['الترتيب']||'';
+  } else if(type === 'dashboard'){
+    document.getElementById('d-title').value = it['العنوان']||'';
+    document.getElementById('d-category').value = it['المجال']||'';
+    document.getElementById('d-link').value = it['الرابط']||'';
+    document.getElementById('d-desc').value = it['الوصف']||'';
+    document.getElementById('d-image').value = it['الصورة']||'';
+    document.getElementById('d-order').value = it['الترتيب']||'';
+  } else if(type === 'client'){
+    document.getElementById('c-title').value = it['العنوان']||'';
+    document.getElementById('c-image').value = it['الصورة']||'';
+    document.getElementById('c-link').value = it['الرابط']||'';
+    document.getElementById('c-order').value = it['الترتيب']||'';
+  }
+  switchTab(type);
+  window.scrollTo({top: document.getElementById('tab-'+type).offsetTop - 20, behavior:'smooth'});
+}
+
+function clearForm(type){
+  if(type === 'blog'){ ['b-title','b-desc','b-link','b-image','b-order'].forEach(id => document.getElementById(id).value=''); }
+  if(type === 'dashboard'){ ['d-title','d-category','d-link','d-desc','d-image','d-order'].forEach(id => document.getElementById(id).value=''); }
+  if(type === 'client'){ ['c-title','c-image','c-link','c-order'].forEach(id => document.getElementById(id).value=''); }
+  showMsg('msg-'+type, '', true);
+}
+
+/* ===================== الحفظ (الإرسال إلى Apps Script) ===================== */
+async function postToScript(payload){
+  const url = getScriptUrl();
+  if(!url) throw new Error('لم يتم إعداد رابط خدمة الحفظ بعد — أضيفيه أعلى الصفحة أولاً');
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if(!data.ok) throw new Error(data.error || 'فشل الحفظ');
+  return data;
+}
+
+async function saveItem(type){
+  const btn = event.target;
+  btn.disabled = true;
+  try{
+    let payload;
+    if(type === 'blog'){
+      payload = { type:'blog', title: val('b-title'), desc: val('b-desc'), link: val('b-link'), image: driveDirect(val('b-image')), order: val('b-order') };
+    } else if(type === 'dashboard'){
+      payload = { type:'dashboard', title: val('d-title'), category: val('d-category'), link: val('d-link'), desc: val('d-desc'), image: driveDirect(val('d-image')), order: val('d-order') };
+    } else if(type === 'client'){
+      payload = { type:'client', title: val('c-title'), image: driveDirect(val('c-image')), link: val('c-link'), order: val('c-order') };
+    }
+    if(!payload.title){ showMsg('msg-'+type, 'العنوان/الاسم مطلوب', false); btn.disabled=false; return; }
+    await postToScript(payload);
+    showMsg('msg-'+type, 'تم الحفظ بنجاح ✓ سيظهر بالموقع خلال ثوانٍ', true);
+    loadExisting();
+  } catch(err){
+    showMsg('msg-'+type, 'خطأ: ' + err.message, false);
+  }
+  btn.disabled = false;
+}
+
+async function saveProfile(){
+  const btn = event.target;
+  btn.disabled = true;
+  try{
+    const rows = [];
+    const map = [
+      ['name', val('p-name')], ['role', val('p-role')], ['bio', val('p-bio')],
+      ['quote', val('p-quote')]
+    ];
+    map.forEach(([key,v]) => { if(v) rows.push({ type:'profile', title:key, desc:v }); });
+    if(val('p-cv')) rows.push({ type:'profile', title:'cv', link: val('p-cv') });
+    if(val('p-photo')) rows.push({ type:'profile', title:'photo', link: driveDirect(val('p-photo')) });
+    if(val('p-q1t')) rows.push({ type:'profile', title:'qual1', desc: val('p-q1t'), icon: val('p-q1i') || '🏅' });
+    if(val('p-q2t')) rows.push({ type:'profile', title:'qual2', desc: val('p-q2t'), icon: val('p-q2i') || '🏅' });
+    if(val('p-q3t')) rows.push({ type:'profile', title:'qual3', desc: val('p-q3t'), icon: val('p-q3i') || '🏅' });
+    if(!rows.length){ showMsg('msg-cv', 'عبّئي حقلاً واحداً على الأقل', false); btn.disabled=false; return; }
+    await postToScript({ rows });
+    showMsg('msg-cv', 'تم الحفظ بنجاح ✓ سيظهر بالموقع خلال ثوانٍ', true);
+  } catch(err){
+    showMsg('msg-cv', 'خطأ: ' + err.message, false);
+  }
+  btn.disabled = false;
+}
+
+function val(id){ return document.getElementById(id).value.trim(); }
+
+/* ===================== تهيئة ===================== */
+function init(){
+  document.getElementById('scriptUrlInput').value = getScriptUrl();
+  testConnection();
+  loadExisting();
+}
+init();
+</script>
+</body>
+</html>
