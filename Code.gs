@@ -1,9 +1,10 @@
 /**
  * ============================================================
  *  محرّك الكتابة في Google Sheet — للوحة تحكم موقع سمية عسيري
+ *  (النسخة المحدَّثة — تدعم 5 تبويبات منفصلة)
  * ============================================================
  * طريقة التركيب (مرة واحدة فقط):
- * 1) افتحي جدول الـ Google Sheet المرتبط بالموقع.
+ * 1) افتحي جدول الـ Google Sheet الجديد (ذو التبويبات الخمسة).
  * 2) من القائمة: الإضافات (Extensions) ← Apps Script.
  * 3) احذفي أي كود موجود في الملف، والصقي هذا الكود كاملاً مكانه.
  * 4) احفظي (Ctrl+S)، ثم من زر "نشر" (Deploy) أعلى يمين الصفحة اختاري
@@ -13,15 +14,37 @@
  * 7) في "من له صلاحية الوصول" (Who has access) اختاري: أي مستخدم (Anyone).
  * 8) اضغطي "نشر" (Deploy) ثم وافقي على صلاحيات الوصول لحسابك.
  * 9) انسخي رابط "تطبيق الويب" (Web app URL) — هذا هو الرابط الذي
- *    تضعينه في أعلى صفحة لوحة التحكم (admin) في خانة "رابط الخدمة".
+ *    تضعينه في أعلى صفحة لوحة التحكم (admin) في خانة "رابط خدمة الحفظ".
  *
- * ملاحظة: أي تعديل لاحق على هذا الكود يتطلب عمل "نشر جديد" مرة أخرى
- * (أو تعديل نفس الإصدار من خلال "إدارة عمليات النشر").
+ * ملاحظة: إذا كان هذا نفس المشروع القديم وتحدّثين الكود فقط، استخدمي
+ * "إدارة عمليات النشر" (Manage deployments) ← تعديل ← إصدار جديد ← نشر،
+ * حتى يبقى نفس الرابط القديم يعمل دون الحاجة لتحديثه في لوحة التحكم.
  * ============================================================
  */
 
-// اسم رأس الأعمدة الثابت المستخدم في الموقع — لا تغيّري ترتيبه
-var COLUMNS = ['النوع', 'الترتيب', 'العنوان', 'المجال', 'الوصف', 'الرابط', 'الصورة', 'الأيقونة'];
+// أسماء التبويبات — يجب أن تطابق أسماء الأوراق (Sheets) في الملف بالضبط
+var TABS = {
+  profile:   'الملف_الشخصي',
+  skill:     'المهارات',
+  client:    'الشعارات',
+  dashboard: 'الداشبورد',
+  blog:      'المدونة'
+};
+
+// أعمدة موحّدة لكل التبويبات
+var COLUMNS = ['الترتيب', 'العنوان', 'المجال', 'الوصف', 'الرابط', 'الصورة', 'الأيقونة'];
+
+function getOrCreateSheet_(name) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(name);
+  if (!sheet) {
+    sheet = ss.insertSheet(name);
+    sheet.getRange(1, 1, 1, COLUMNS.length).setValues([COLUMNS]);
+  } else if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, COLUMNS.length).setValues([COLUMNS]);
+  }
+  return sheet;
+}
 
 function doGet(e) {
   return ContentService
@@ -32,25 +55,23 @@ function doGet(e) {
 function doPost(e) {
   try {
     var body = JSON.parse(e.postData.contents);
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
-
-    // تأكيد وجود صف رأس الأعمدة الصحيح — يُنشئه تلقائياً إن كان الجدول فارغاً
-    var lastRow = sheet.getLastRow();
-    if (lastRow === 0) {
-      sheet.getRange(1, 1, 1, COLUMNS.length).setValues([COLUMNS]);
-      lastRow = 1;
-    }
-
-    var values = lastRow > 0 ? sheet.getRange(1, 1, lastRow, COLUMNS.length).getValues() : [COLUMNS];
-
     var items = body.rows ? body.rows : [body];
     var results = [];
 
     items.forEach(function (r) {
-      var type = (r.type || '').toString().trim();
+      var type = (r.type || '').toString().trim().toLowerCase();
+      var tabName = TABS[type];
+      if (!tabName) {
+        results.push({ type: type, action: 'skipped-unknown-type' });
+        return;
+      }
+
+      var sheet = getOrCreateSheet_(tabName);
+      var lastRow = sheet.getLastRow();
+      var values = lastRow > 0 ? sheet.getRange(1, 1, lastRow, COLUMNS.length).getValues() : [COLUMNS];
+
       var title = (r.title || '').toString().trim();
       var newRow = [
-        type,
         r.order || '',
         title,
         r.category || '',
@@ -60,12 +81,11 @@ function doPost(e) {
         r.icon || ''
       ];
 
-      // البحث عن صف موجود بنفس (النوع + العنوان) لتحديثه بدل تكراره
+      // البحث عن صف موجود بنفس العنوان داخل هذا التبويب لتحديثه بدل تكراره
       var foundRowIndex = -1;
       for (var i = 1; i < values.length; i++) {
-        var rowType = (values[i][0] || '').toString().trim();
-        var rowTitle = (values[i][2] || '').toString().trim();
-        if (rowType === type && rowTitle === title && title !== '') {
+        var rowTitle = (values[i][1] || '').toString().trim();
+        if (rowTitle === title && title !== '') {
           foundRowIndex = i + 1; // فهرس الصف الفعلي في الشيت (1-based)
           break;
         }
@@ -73,11 +93,10 @@ function doPost(e) {
 
       if (foundRowIndex > 0) {
         sheet.getRange(foundRowIndex, 1, 1, COLUMNS.length).setValues([newRow]);
-        results.push({ type: type, title: title, action: 'updated' });
+        results.push({ type: type, title: title, tab: tabName, action: 'updated' });
       } else {
         sheet.appendRow(newRow);
-        values.push(newRow);
-        results.push({ type: type, title: title, action: 'added' });
+        results.push({ type: type, title: title, tab: tabName, action: 'added' });
       }
     });
 

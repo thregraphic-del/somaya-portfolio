@@ -452,8 +452,31 @@ footer .f-admin:hover{opacity:1;color:var(--cyan)}
    ⚙️  المحرّك الديناميكي — يقرأ Google Sheet كقاعدة بيانات
    ============================================================ */
 
-// رابط CSV لجدول جوجل شيت (تم تحويله من pubhtml إلى pub?output=csv)
+// رابط CSV لجدول جوجل شيت (نسخة احتياطية قديمة — تُستخدم فقط إن لم يتوفر SPREADSHEET_ID أدناه)
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS-WPGyCU7fTKoDuNWd8a5ydXcz9joARCL5Yxk7aPjbB11ifOeaWsEp7zifEEYr86qH5JdOQDAv5k4_/pub?output=csv";
+
+// ===== الهيكلة الجديدة متعددة التبويبات =====
+// ضعي هنا معرف الشيت (Spreadsheet ID) بعد إنشاء التبويبات الخمسة — راجعي لوحة التحكم admin لمعرفة الخطوات
+const SPREADSHEET_ID = "";
+const TABS = { profile:'الملف_الشخصي', skill:'المهارات', client:'الشعارات', dashboard:'الداشبورد', blog:'المدونة' };
+function gvizUrl(sheetName){
+  return `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}&cb=${Date.now()}`;
+}
+async function fetchTab(sheetName){
+  try{
+    const res = await fetch(gvizUrl(sheetName));
+    if(!res.ok) return [];
+    return csvToObjects(await res.text());
+  } catch(e){ return []; }
+}
+async function loadSheetDataMultiTab(){
+  const [profileRows, skill, client, dashboard, blog] = await Promise.all(
+    Object.values(TABS).map(fetchTab)
+  );
+  const grouped = { profileRows, skill, client, dashboard, blog };
+  const hasAny = profileRows.length || skill.length || client.length || dashboard.length || blog.length;
+  return hasAny ? grouped : null;
+}
 
 // المحتوى الافتراضي (Fallback) — يظهر فوراً وأثناء تعذّر الاتصال بالشيت
 const DEFAULTS = {
@@ -603,6 +626,14 @@ function byOrder(a,b){
 
 /* ===================== جلب بيانات الشيت وتجميعها ===================== */
 async function loadSheetData(){
+  if(SPREADSHEET_ID){
+    const g = await loadSheetDataMultiTab();
+    if(g) return g;
+  }
+  return loadSheetDataLegacy();
+}
+
+async function loadSheetDataLegacy(){
   try{
     const res = await fetch(SHEET_CSV_URL + (SHEET_CSV_URL.includes('?') ? '&' : '?') + 'cachebust=' + Date.now());
     if(!res.ok) throw new Error('sheet fetch failed');
