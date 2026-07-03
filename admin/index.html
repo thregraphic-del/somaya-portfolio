@@ -248,7 +248,7 @@ const LS_SCRIPT_URL = 'appsScriptUrl';
 const LS_SPREADSHEET_ID = 'spreadsheetId';
 const TABS = { profile:'الملف_الشخصي', skill:'المهارات', client:'الشعارات', dashboard:'الداشبورد', blog:'المدونة' };
 
-function getSpreadsheetId(){ return localStorage.getItem(LS_SPREADSHEET_ID) || ''; }
+function getSpreadsheetId(){ return localStorage.getItem(LS_SPREADSHEET_ID) || DEFAULT_SPREADSHEET_ID; }
 function saveSpreadsheetId(){
   const v = document.getElementById('ssidInput').value.trim();
   localStorage.setItem(LS_SPREADSHEET_ID, v);
@@ -267,7 +267,10 @@ async function fetchTabAdmin(sheetName){
   } catch(e){ return []; }
 }
 
-function getScriptUrl(){ return localStorage.getItem(LS_SCRIPT_URL) || ''; }
+const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwmalGXr0Bs18GIMaYkYp_nIOiT_NS20R4H3oV9OMDkqI4ggxvPS9ODTJsDQA0xQ5ly/exec';
+const DEFAULT_SPREADSHEET_ID = '1ilE_CH4UMkmKTICwdBZUFub0VdTfhNu56hbgVbsWozs';
+
+function getScriptUrl(){ return localStorage.getItem(LS_SCRIPT_URL) || DEFAULT_SCRIPT_URL; }
 function saveScriptUrl(){
   const v = document.getElementById('scriptUrlInput').value.trim();
   localStorage.setItem(LS_SCRIPT_URL, v);
